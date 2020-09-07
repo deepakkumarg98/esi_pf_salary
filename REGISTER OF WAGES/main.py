@@ -53,19 +53,20 @@ def U_leave_holiday(lst_hol,lst_leav): # passing list of holiday and list of lea
     lst_hol=set(lst_hol)
     lst_leav=set(lst_leav)
     lst_common=list(lst_leav&lst_hol)
+    print("common : " ,lst_common, "\n", "holiday list : ",lst_hol,"\nLeave List",lst_leav)
     if lst_common:
-        return len(lst_common)
+        return no_of_holidays-len(lst_common)      #bug fixed
     else:
-        return 0
+        return no_of_holidays    #bug fixed
 
 #FUNCTION TO EXPORT FINAL OUTPUT TO TEXT FILE
 def exportData():
     final_export_data=""
-    for i in range(0,total_emp):
+    for i in range(0,total_emp+1):
         for j in range (0,21):
-            print(str(listcpy[i][j])+"\t",end="")
+            final_export_data+=str(listcpy[i][j])+"\t"
         final_export_data+="\n"
-    print(listcpy)
+    print(final_export_data)
 
 
     try:
@@ -127,10 +128,10 @@ def copyToListCPY():
 
 
             temp_leave_list = list_main[i][7]
-            if int(list_main[i][8])==0:
+            if (list_main[i][8])=='0':
                 listcpy[i+1][3]=no_of_holidays # if there are no leaves i.e all eligible holidays will be given
             else:
-                listcpy[i+1][3]=U_leave_holiday(list_main[i][7],list_holiday) #@holidays-
+                listcpy[i+1][3]=U_leave_holiday(list_holiday,list_main[i][7]) #@holidays-
                 #check how many leaves matches holidays
                 
           
@@ -168,10 +169,11 @@ def copyToListCPY():
             if tmp_actual_otHours==0:
                 listcpy[i+1][11]=0
             else:                                         #@o.t wages
-                listcpy[i+1][11]=tmp_actual_otHours/one_day_work_hour*(listcpy[i][8]/max_days_of_month)
+                listcpy[i+1][11]=tmp_actual_otHours/one_day_work_hour*(listcpy[i+1][8]/max_days_of_month)
                 
             #after calculating ot wages then continue to calculate esic wages as esic wage = wages for work done + ot wages
-            if list_main[i][7]=='y' or list_main[i][7]=='Y':
+            if list_main[i][6]=='y' or list_main[i][6]=='Y':
+              
                                   
                 listcpy[i+1][10]= (listcpy[i+1][4]/max_days_of_month*listcpy[i+1][8])+ listcpy[i+1][11] #@esic wage-
             else:
