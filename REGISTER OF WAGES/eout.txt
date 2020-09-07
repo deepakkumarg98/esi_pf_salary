@@ -1,0 +1,1 @@
+S.no#Name of Employees#Working Days#Holi-days#Total Days#Desig.#Rate of Basic Wages#Rate of V.D.A#Total Rate of Wages/Salary#PF wages#Esi Wages#O.T wages#Total Amt. Payable#P.F#Family Pension#Total P.F#E.S.I contribution (.75%)#Advance/Loan/I.T#Total Deductions#Balance Paid#Signature or Thumb Impression of Employee
