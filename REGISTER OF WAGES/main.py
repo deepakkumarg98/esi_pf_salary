@@ -60,7 +60,28 @@ def U_leave_holiday(lst_hol,lst_leav): # passing list of holiday and list of lea
 
 #FUNCTION TO EXPORT FINAL OUTPUT TO TEXT FILE
 def exportData():
-    print("A")
+    final_export_data=""
+    for i in range(0,total_emp):
+        for j in range (0,21):
+            print(str(listcpy[i][j])+"\t",end="")
+        final_export_data+="\n"
+    print(listcpy)
+
+
+    try:
+        tmp_file_out=open("salary.txt",'w+')
+        tmp_file_out.write(final_export_data)
+    except IOError:
+        print("File not found or path is incorrect")
+        
+    finally:
+        print("exit")
+    
+        
+        
+        
+
+    
 #function to convert and calculate things and convert into required meaningful format    
 def copyToListCPY():
     global listcpy
@@ -78,7 +99,7 @@ def copyToListCPY():
         #function to initialize the array with some values then later update it
   
         for i in range(total_emp):
-            listcpy.insert(i+1,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+            listcpy.insert(i+1,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
         
             
         
@@ -89,7 +110,7 @@ def copyToListCPY():
            
                
             #print("i ",i)    
-            listcpy[i+1][0]=i+2 #@s.no-    
+            listcpy[i+1][0]=i+1 #@s.no-    
             listcpy[i+1][1]=list_main[i][0] #@name-
 
             #NO OF DAYS
@@ -169,7 +190,8 @@ def copyToListCPY():
             
             listcpy[i+1][17]=0 #@advance/loan
             listcpy[i+1][18]=listcpy[i+1][15]+listcpy[i+1][16] #@total deductions
-            
+            listcpy[i+1][19]=listcpy[i+1][12]- listcpy[i+1][18] #@amount payable
+            listcpy[i+1][20]="" #@signature
            
            
   
@@ -200,7 +222,8 @@ with open("data.txt") as f :
 
     
     copyToListCPY()
-    print(listcpy)
+    exportData()
+    print("done : !  ")
     #print(list_data)    
     #print(listcpy)
         
