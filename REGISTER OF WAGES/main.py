@@ -26,7 +26,7 @@ separation symbol #
 
 full in format: with index
 
-         01            02             03               04              05            06           07           08             09
+         0            01             02               03              04            05           06           07             08
 <name of employee>#<designation>#<working days>#<rate of wages>#<rate of v.d.a>#<pf opted? >#<esi opted ?>#<leaves data>#<Overtime Hours>
 
 
@@ -39,9 +39,11 @@ listcpy=[] # main meaningfull list
 total_emp=0 #total employees
 list_holiday=[] #list of holidays dates
 no_of_holidays=0 # eligible no of holidays
-max_days_of_month=0 # month's max days e.g for feb it;s 28 and july it;s 31
-one_day_work_hour=0 # no of hours of work in a day
-#function to read holiday list from text file 
+max_days_of_month=31 # month's max days e.g for feb it;s 28 and july it;s 31
+one_day_work_hour=8 # no of hours of work in a day
+#function to read holiday list from text file
+
+
 with open("holidays.txt") as f:
     a=f.read()
     list_holiday=a.split(",")
@@ -56,20 +58,43 @@ def U_leave_holiday(lst_hol,lst_leav): # passing list of holiday and list of lea
     else:
         return 0
 
-
+#FUNCTION TO EXPORT FINAL OUTPUT TO TEXT FILE
+def exportData():
+    print("A")
 #function to convert and calculate things and convert into required meaningful format    
 def copyToListCPY():
+    global listcpy
+    global no_of_holidays
+    global list_holiday
+    global total_emp
     with open("eout.txt") as f :
+        
         a=f.read()
         temp=a.split("#")
         #print(temp)
         listcpy.insert(0,temp)
+
+        
+        #function to initialize the array with some values then later update it
+  
         for i in range(total_emp):
-            listcpy[i][0]=i+1 #s.no-
-            listcpy[i][1]=list_main[i][0] #@name-
+            listcpy.insert(i+1,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        
+            
+        
+        for i in range(total_emp):
+            
+
+            
+           
+               
+            #print("i ",i)    
+            listcpy[i+1][0]=i+2 #@s.no-    
+            listcpy[i+1][1]=list_main[i][0] #@name-
 
             #NO OF DAYS
-            listcpy[i][2]=list_main[i][2] #@working days-
+            
+            listcpy[i+1][2]=int(list_main[i][2]) #@working days-
 
             #check holidays 
             
@@ -80,70 +105,77 @@ def copyToListCPY():
             
 
 
-            temp_leave_list = list_main[i][8]
+            temp_leave_list = list_main[i][7]
             if int(list_main[i][8])==0:
-                listcpy[i][3]=no_of_holidays # if there are no leaves i.e all eligible holidays will be given
+                listcpy[i+1][3]=no_of_holidays # if there are no leaves i.e all eligible holidays will be given
             else:
-                listcpy[i][3]=U_leave_holiday(list_main[i][8]),list_holiday) #@holidays-
+                listcpy[i+1][3]=U_leave_holiday(list_main[i][7],list_holiday) #@holidays-
                 #check how many leaves matches holidays
                 
           
-            listcpy[i][4]=int(listcpy[i][2])+ int(listcpy[i][3]) #@total days-
+            listcpy[i+1][4]=(listcpy[i+1][2])+ (listcpy[i+1][3]) #@total days-
 
             #POSITION 
-            listcpy[i][5]=list_main[i][2] #@designation-
+            listcpy[i+1][5]=list_main[i][1] #@designation-
 
             #WAGES
-            listcpy[i][6]=list_main[i][4] #@rate of wages-
-            listcpy[i][7]=list_main[i][5] #@rate of vda-
-            listcpy[i][8]=int(list_main[i][4])+int(list_main[i][5]) #@total wages/salary-
+            listcpy[i+1][6]=list_main[i][3] #@rate of wages-
+            listcpy[i+1][7]=list_main[i][4] #@rate of vda-
+            listcpy[i+1][8]=int(list_main[i][3])+int(list_main[i][4]) #@total wages/salary-
 
             #ESIC PF OT
             
             #check if pf opted
             if list_main[i][5]=='y' or list_main[i][5]=='Y':
-                listcpy[i][9]=list_main[i][0]               #@pf wage
-
+                                                                #@pf wage
                 #check if total salary is <=15000
-                if int(list_cpy[i][8])<=15000:
-                    list_cpy[i][8]=listcpy[i][4]/max_days_of_month*listcpy[i][8]
+                if int(listcpy[i+1][8])<=15000:
+                    listcpy[i+1][9]=listcpy[i+1][4]/max_days_of_month*listcpy[i][8]
                 else:
-                    list_cpy[i][8]=15000
+                    listcpy[i+1][9]=15000
                     
-                     
+            else:
+                listcpy[i+1][9]=0
+                
             
                 
             
 
             #calculating overtime wages
-            tmp_actual_otHours=int(list_main[i][9])*2
+            tmp_actual_otHours=int(list_main[i][8])*2
             #check if overtime is zero
             if tmp_actual_otHours==0:
-                listcpy[i][11]=0
+                listcpy[i+1][11]=0
             else:                                         #@o.t wages
-                listcpy[i][11]=tmp_actual_otHours/one_day_work_hour*(listcpy[i][8]/max_days_of_month)
+                listcpy[i+1][11]=tmp_actual_otHours/one_day_work_hour*(listcpy[i][8]/max_days_of_month)
                 
-            #after calculating ot wages then continue to calculate esic wages as esic wage = wages for work done + ot wages    
-            listcpy[i][10]= (listcpy[i][4]/max_days_of_month*listcpy[i][8])+ listcpy[i][11] #@esic wage-
+            #after calculating ot wages then continue to calculate esic wages as esic wage = wages for work done + ot wages
+            if list_main[i][7]=='y' or list_main[i][7]=='Y':
+                                  
+                listcpy[i+1][10]= (listcpy[i+1][4]/max_days_of_month*listcpy[i+1][8])+ listcpy[i+1][11] #@esic wage-
+            else:
+                listcpy[i+1][10]=0
             
-            listcpy[i][12]=list_main[i][0] #@total amount payable
+            listcpy[i+1][12]=(listcpy[i+1][4]/max_days_of_month*listcpy[i+1][8])+ listcpy[i+1][11] #@total amount payable
 
             #DEDUCTIONS
-            listcpy[i][13]=list_main[i][0] #@pf
-            listcpy[i][14]=list_main[i][0] #@family pension
-            listcpy[i][15]=list_main[i][0] #@total pf
-            listcpy[i][16]=list_main[i][0] #@esi contribution .75%
-            listcpy[i][17]=list_main[i][0] #@advance/loan
-            listcpy[i][18]=list_main[i][0] #@total deductions
+            listcpy[i+1][13]=listcpy[i+1][8]/12 #@pf
+            
+            listcpy[i+1][15]=listcpy[i+1][8]/10 #@total pf
+            
+            listcpy[i+1][14]=(listcpy[i+1][8]/10)-(listcpy[i+1][8]/12) #@family pension =>> total pf-pf
+            
+            listcpy[i+1][16]=3/4*listcpy[i+1][10]/100 #@esi contribution .75%
+            
+            listcpy[i+1][17]=0 #@advance/loan
+            listcpy[i+1][18]=listcpy[i+1][15]+listcpy[i+1][16] #@total deductions
             
            
            
   
 
 
-copyToListCPY()
-print(listcpy)
-    
+   
 with open("data.txt") as f :
     
     a=f.read()
@@ -163,12 +195,23 @@ with open("data.txt") as f :
         
         temp_list=list_data[i].split("#")
         list_main.insert(i,temp_list)
+
+    #copyToListCPY()
+
+    
+    copyToListCPY()
+    print(listcpy)
+    #print(list_data)    
+    #print(listcpy)
         
-        
+    
+
+    
             
                   
     
         
    # print(list_main, "\n", list_main[0][2])
+   
 
     
