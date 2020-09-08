@@ -39,7 +39,7 @@ listcpy=[] # main meaningfull list
 total_emp=0 #total employees
 list_holiday=[] #list of holidays dates
 no_of_holidays=0 # eligible no of holidays
-max_days_of_month=31 # month's max days e.g for feb it;s 28 and july it;s 31
+max_days_of_month=30 # month's max days e.g for feb it;s 28 and july it;s 31
 one_day_work_hour=8 # no of hours of work in a day
 #function to read holiday list from text file
 
@@ -50,10 +50,20 @@ with open("holidays.txt") as f:
     
 #function to calculate actual holidays awarded to the employee
 def U_leave_holiday(lst_hol,lst_leav): # passing list of holiday and list of leave to find intersection of leaves into holiday
+
     lst_hol=set(lst_hol)
+    
+    if "," in lst_leav:
+        lst_leav=lst_leav.split(",")
+    else:
+        lst_leav+=','
+        lst_leav=lst_leav.split(",")
     lst_leav=set(lst_leav)
+    
+    
     lst_common=list(lst_leav&lst_hol)
-    print("common : " ,lst_common, "\n", "holiday list : ",lst_hol,"\nLeave List",lst_leav)
+   # print("common : " ,lst_common, "\n", "holiday list : ",lst_hol,"\nLeave List",lst_leav)
+    
     if lst_common:
         return no_of_holidays-len(lst_common)      #bug fixed
     else:
@@ -66,7 +76,7 @@ def exportData():
         for j in range (0,21):
             final_export_data+=str(listcpy[i][j])+"\t"
         final_export_data+="\n"
-    print(final_export_data)
+    #print(final_export_data)
 
 
     try:
@@ -76,7 +86,7 @@ def exportData():
         print("File not found or path is incorrect")
         
     finally:
-        print("exit")
+        print("Done")
     
         
         
@@ -116,7 +126,7 @@ def copyToListCPY():
 
             #NO OF DAYS
             
-            listcpy[i+1][2]=int(list_main[i][2]) #@working days-
+            listcpy[i+1][2]=float(list_main[i][2]) #@working days-
 
             #check holidays 
             
@@ -127,11 +137,13 @@ def copyToListCPY():
             
 
 
-            temp_leave_list = list_main[i][7]
-            if (list_main[i][8])=='0':
+            temp_leave_list = list_main[i][7] #temporary leave list
+            if (list_main[i][7])=='0':
                 listcpy[i+1][3]=no_of_holidays # if there are no leaves i.e all eligible holidays will be given
             else:
-                listcpy[i+1][3]=U_leave_holiday(list_holiday,list_main[i][7]) #@holidays-
+                listcpy[i+1][3]=U_leave_holiday(list_holiday,list_main[i][7]) #@holidays-  #make sure here we are sending direct data not splitted one
+               # print("sending : leave list : ", list_main[i][7])
+
                 #check how many leaves matches holidays
                 
           
@@ -151,8 +163,9 @@ def copyToListCPY():
             if list_main[i][5]=='y' or list_main[i][5]=='Y':
                                                                 #@pf wage
                 #check if total salary is <=15000
-                if int(listcpy[i+1][8])<=15000:
-                    listcpy[i+1][9]=listcpy[i+1][4]/max_days_of_month*listcpy[i][8]
+                tmp_wages=(listcpy[i+1][4]/max_days_of_month)*listcpy[i+1][8]
+                if int(tmp_wages)<=15000:
+                  listcpy[i+1][9]=round((listcpy[i+1][4]/max_days_of_month)*listcpy[i+1][8],2) #rounding upto 2 decimals 
                 else:
                     listcpy[i+1][9]=15000
                     
@@ -169,30 +182,29 @@ def copyToListCPY():
             if tmp_actual_otHours==0:
                 listcpy[i+1][11]=0
             else:                                         #@o.t wages
-                listcpy[i+1][11]=tmp_actual_otHours/one_day_work_hour*(listcpy[i+1][8]/max_days_of_month)
+                listcpy[i+1][11]=round(tmp_actual_otHours/one_day_work_hour*(listcpy[i+1][8]/max_days_of_month),2)#rounding upto 2 decimals 
                 
             #after calculating ot wages then continue to calculate esic wages as esic wage = wages for work done + ot wages
-            if list_main[i][6]=='y' or list_main[i][6]=='Y':
-              
+            if list_main[i][6]=='y' or list_main[i][6]=='Y':           
                                   
-                listcpy[i+1][10]= (listcpy[i+1][4]/max_days_of_month*listcpy[i+1][8])+ listcpy[i+1][11] #@esic wage-
+                listcpy[i+1][10]= round((listcpy[i+1][4]/max_days_of_month*listcpy[i+1][8])+ listcpy[i+1][11],2) #@esic wage-
             else:
                 listcpy[i+1][10]=0
             
-            listcpy[i+1][12]=(listcpy[i+1][4]/max_days_of_month*listcpy[i+1][8])+ listcpy[i+1][11] #@total amount payable
+            listcpy[i+1][12]=round((listcpy[i+1][4]/max_days_of_month*listcpy[i+1][8])+ listcpy[i+1][11],2) #@total amount payable
 
             #DEDUCTIONS
-            listcpy[i+1][13]=listcpy[i+1][8]/12 #@pf
+            listcpy[i+1][13]=round(listcpy[i+1][9]/12,2) #@pf
             
-            listcpy[i+1][15]=listcpy[i+1][8]/10 #@total pf
+            listcpy[i+1][15]=round(listcpy[i+1][9]/10,2) #@total pf
             
-            listcpy[i+1][14]=(listcpy[i+1][8]/10)-(listcpy[i+1][8]/12) #@family pension =>> total pf-pf
+            listcpy[i+1][14]=(listcpy[i+1][15])-(listcpy[i+1][13]) #@family pension =>> total pf-pf
             
-            listcpy[i+1][16]=3/4*listcpy[i+1][10]/100 #@esi contribution .75%
+            listcpy[i+1][16]=round(3/4*listcpy[i+1][10]/100,2) #@esi contribution .75%
             
             listcpy[i+1][17]=0 #@advance/loan
-            listcpy[i+1][18]=listcpy[i+1][15]+listcpy[i+1][16] #@total deductions
-            listcpy[i+1][19]=listcpy[i+1][12]- listcpy[i+1][18] #@amount payable
+            listcpy[i+1][18]=round(listcpy[i+1][15]+listcpy[i+1][16],2) #@total deductions
+            listcpy[i+1][19]=round(listcpy[i+1][12]- listcpy[i+1][18],2) #@amount payable
             listcpy[i+1][20]="" #@signature
            
            
@@ -219,14 +231,16 @@ with open("data.txt") as f :
         
         temp_list=list_data[i].split("#")
         list_main.insert(i,temp_list)
+    
+        
 
     #copyToListCPY()
 
     
     copyToListCPY()
     exportData()
-    print("done : !  ")
-    #print(list_data)    
+    #print("done : !  ")
+    #print(list_main[15][7])    
     #print(listcpy)
         
     
