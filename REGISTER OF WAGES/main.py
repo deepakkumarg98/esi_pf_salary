@@ -26,6 +26,7 @@ separation symbol #
 
 full in format: with index
 
+
          0            01             02               03              04            05           06           07             08
 <name of employee>#<designation>#<working days>#<rate of wages>#<rate of v.d.a>#<pf opted? >#<esi opted ?>#<leaves data>#<Overtime Hours>
 
@@ -39,7 +40,7 @@ listcpy=[] # main meaningfull list
 total_emp=0 #total employees
 list_holiday=[] #list of holidays dates
 no_of_holidays=0 # eligible no of holidays
-max_days_of_month=30 # month's max days e.g for feb it;s 28 and july it;s 31
+max_days_of_month=31 # month's max days e.g for feb it;s 28 and july it;s 31
 one_day_work_hour=8 # no of hours of work in a day
 #function to read holiday list from text file
 
@@ -72,11 +73,14 @@ def U_leave_holiday(lst_hol,lst_leav): # passing list of holiday and list of lea
 #FUNCTION TO EXPORT FINAL OUTPUT TO TEXT FILE
 def exportData():
     final_export_data=""
-    for i in range(0,total_emp+1):
+    for i in range(0,len(listcpy)):
         for j in range (0,21):
-            final_export_data+=str(listcpy[i][j])+"\t"
+            try:final_export_data+=str(listcpy[i][j])+"\t"
+            except Exception as e:print(" i , j ", i,j)
         final_export_data+="\n"
     #print(final_export_data)
+
+    #print("\n len : i,o ",len(listcpy),total_emp)
 
 
     try:
@@ -90,9 +94,238 @@ def exportData():
     
         
         
+#function to round to always next possible int
+#i.e round of 4.3 =5, or maybe general for future
+def myRound(number):
+    return int(round(number,0))
+        
+#function to add total row
+
+'''
+tmp_totals indexes
+
+0  - working days
+1 -  holidays
+2- total days
+3-rate of wage
+4-rate of vda
+5-total wages
+6-pf wage
+7-esi wage
+8-ot wage
+9-amt payable
+10-pf
+11-family pension
+12-total pf
+13-esic contribution
+14-loan
+15-total deduction
+16-balance paid
+'''
+def addTotalrow():
+    global listcpy
+    tmp_totals=[0.0]*17
+    for i in range(0,total_emp):
+        tmp_totals[0]+=float(listcpy[i+1][2])
+        tmp_totals[1]+=float(listcpy[i+1][3])
+        tmp_totals[2]+=float(listcpy[i+1][4])
+        tmp_totals[3]+=float(listcpy[i+1][6])
+        tmp_totals[4]+=float(listcpy[i+1][7])
+        tmp_totals[5]+=float(listcpy[i+1][8])
+        tmp_totals[6]+=float(listcpy[i+1][9])
+        tmp_totals[7]+=float(listcpy[i+1][10])
+        tmp_totals[8]+=float(listcpy[i+1][11])
+        tmp_totals[9]+=float(listcpy[i+1][12])
+        tmp_totals[10]+=float(listcpy[i+1][13])
+        tmp_totals[11]+=float(listcpy[i+1][14])
+        tmp_totals[12]+=float(listcpy[i+1][15])
+        tmp_totals[13]+=float(listcpy[i+1][16])
+        tmp_totals[14]+=float(listcpy[i+1][17])
+        tmp_totals[15]+=float(listcpy[i+1][18])
+        tmp_totals[16]+=float(listcpy[i+1][19])
+    #print(tmp_totals[11])
+    for i in range(17):
+        tmp_totals[i]=myRound(tmp_totals[i])
+    list_toadd=['','']
+    for i in range(3):
+        list_toadd.append(tmp_totals[i])
+    list_toadd.append('')
+    for i in range(3,17):
+         list_toadd.append(tmp_totals[i])
+    list_toadd.append('')
+    listcpy.insert(total_emp+1,list_toadd)
+    #print(list_toadd)
+   
+   
+    
+   
+        
+'''
+listcpy indexes
+
+
+  0         01                   02          03          04         05       06            07                 08
+<S.no>#<Name of Employees>#<Working Days>#<holida>#<Total Days>#<Desig.>#<Rate Wages>#<Rate of V.D.A>#<Total Wages/Salary>
+
+
+
+    09         10           11                12          13           14            15                16                     17
+<PF wages>#<Esi Wages>#<O.T wages>#<Total Amt. Payable># <P.F> #<Family Pension>#<Total P.F>#<E.S.I contribution (.75%)>#<Advance/Loan/I.T>
+
+
+       18                 19                      20
+#<Total Deductions>#<Balance Paid>#<Signature or Thumb Impression of Employee>
+'''           
+#function to use balanced ai in all the listcpy columns
+def balance_the_sheet():
+    #accessing global listcpy
+    global listcpy
+
+    #passing the values to the function
+    
+   
+    for j in range (9,20):
+                            
+        #updating the listcpy through returned data
+        tmp_bal_data = root_balance_helper(j)
+        for i in range(1,len(listcpy)):
+            #print(" index ",i," ", listcpy[i][j])
+            #print(" index mod ",i," ", tmp_bal_data[i-1],"\n")
+            listcpy[i][j]= tmp_bal_data[i-1]
+        #print(tmp_bal_data)
+        #listcpy[j][i]=tmp_bal_data[j]
+        #print(" i , j : " , i , " , ", j)
+    return "done"
+    
+
+#helper function : Find sum of all elements of a listbox
+def sumList(lista):
+    tmp_sum=0
+    for i in range (len(lista)):
+        tmp_sum+=float(lista[i])
+    return tmp_sum
         
 
+#function to balance things
+def root_balance_helper(index_i):
+   
+    tmp_list=[] # list of a particular fiels of different me
+    tmp_rounded_list=[] #stores rounded or final output of data
+    for i in range (1,len(listcpy)):
+        tmp_list.append(listcpy[i][index_i])
+        tmp_rounded_list.append(round(listcpy[i][index_i],0))
+    #print(tmp_list)
+
+   
     
+    tmp_dlist=[] #temporary data list to include differences list ie. 8.6 will list 0.6, 8.1 list 0.1
+
+    p_list=[]
+    n_list=[]
+    sum_p_and_n=0
+    for i in range(len(tmp_list)):
+        tmp_item=float(tmp_list[i])-int(tmp_list[i])
+        tmp_item=round(tmp_item,2)
+        
+        if tmp_item>=0.5:
+            tmp_dlist.append(0)
+            n_list.append(0)
+            p_list.append(round((1-tmp_item),2))
+            
+        else:
+            tmp_dlist.append((tmp_item))
+            n_list.append(round((tmp_item),2))
+            p_list.append(0)
+    #print(" p list : " , n_list)
+    #print(tmp_list)
+    #print("\n\n\n\nP List : ",p_list,'\n N list : ', n_list," max p list, min p list: ", max(p_list), ',',min(p_list))
+    
+    #calculate how much to increase
+    #print(p_list[3])
+    sum_p_and_n=int(round(sumList(p_list)-sumList(n_list),0))
+    #print(sum_p_and_n)
+    if sum_p_and_n>0: #overall increament
+        # deduct
+       
+
+        i=len(p_list)
+        while(i>0):
+            i-=1
+            
+            tmp_max=max(p_list)
+            for j in range(len(p_list)):
+               
+                if p_list[j]==tmp_max:
+                   # print(f"P list at {j} is {float(p_list[j])} and tmp_max is {tmp_max}")
+                    #print(p_list[j])
+                    
+                    #print("before : ",tmp_rounded_list[j])
+                    tmp_rounded_list[j]-=1
+                   # print("after : ",tmp_rounded_list[j])
+                    p_list[j]=0
+                    tmp_sum=0
+                    
+                    for x in range(0,len(tmp_rounded_list)-1):
+                        tmp_sum+=tmp_rounded_list[x]
+                    
+                    if tmp_rounded_list[-1]==tmp_sum:
+                        #print("ddfsdfsdfasdfsd")
+                        i=0
+                        j=len(p_list)
+                        break                   
+                
+                         
+            
+    elif sum_p_and_n<0:
+        # addition
+        
+        i=len(n_list)
+        while(i>0):
+            i-=1
+            tmp_max=max(n_list)
+            for j in range(len(n_list)):
+               
+                if n_list[j]==tmp_max:
+                    #print(f"P list at {j} is {float(p_list[j])} and tmp_max is {tmp_max}")
+                    #print(p_list[j])
+                    
+                    #print("before : ",tmp_rounded_list[j])
+                    tmp_rounded_list[j]+=1
+                    #print("after : ",tmp_rounded_list[j])
+                    n_list[j]=0
+                    tmp_sum=0
+                    
+                    for x in range(0,len(tmp_rounded_list)-1):
+                        tmp_sum+=tmp_rounded_list[x]
+                    
+                    if tmp_rounded_list[-1]==tmp_sum:
+                        #print("ddfsdfsdfasdfsd")
+                        i=0
+                        j=len(n_list)
+                        break
+    elif sum_p_and_n==0:
+        print("zero already done")
+        
+            
+                    
+                
+                    
+            
+    
+        
+   
+    
+    #print("\n Increment : ", sum_p_and_n, "\n max , min : ", max(tmp_dlist),min(tmp_dlist))
+     
+    return tmp_rounded_list #returning the balanced sheet
+        
+  
+    
+
+        
+        
+    
+
 #function to convert and calculate things and convert into required meaningful format    
 def copyToListCPY():
     global listcpy
@@ -117,9 +350,7 @@ def copyToListCPY():
         for i in range(total_emp):
             
 
-            
-           
-               
+         
             #print("i ",i)    
             listcpy[i+1][0]=i+1 #@s.no-    
             listcpy[i+1][1]=list_main[i][0] #@name-
@@ -206,6 +437,8 @@ def copyToListCPY():
             listcpy[i+1][18]=round(listcpy[i+1][15]+listcpy[i+1][16],2) #@total deductions
             listcpy[i+1][19]=round(listcpy[i+1][12]- listcpy[i+1][18],2) #@amount payable
             listcpy[i+1][20]="" #@signature
+        addTotalrow()
+        
            
            
   
@@ -238,7 +471,12 @@ with open("data.txt") as f :
 
     
     copyToListCPY()
+    balance_the_sheet()
+    #print(root_balance_helper(10))
+    
     exportData()
+    
+    #print(listcpy)
     #print("done : !  ")
     #print(list_main[15][7])    
     #print(listcpy)
